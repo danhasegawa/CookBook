@@ -1,7 +1,7 @@
 package com.dh.cookbookapp.data.mapper
 
 import com.dh.cookbookapp.data.entity.RecipeEntity
-import com.dh.cookbookapp.domain.model.RecipeDomain
+import com.dh.cookbookapp.data.repository.model.RecipeDomain
 
 fun RecipeDomain.toEntity() = RecipeEntity(
     id = id,

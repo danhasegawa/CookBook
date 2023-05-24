@@ -1,4 +1,4 @@
-package com.dh.cookbookapp.domain.model
+package com.dh.cookbookapp.data.repository.model
 
 typealias RecipeDomain = Recipe
 

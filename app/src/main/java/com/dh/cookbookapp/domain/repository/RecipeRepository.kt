@@ -1,6 +1,6 @@
 package com.dh.cookbookapp.domain.repository
 
-import com.dh.cookbookapp.domain.model.RecipeDomain
+import com.dh.cookbookapp.data.repository.model.RecipeDomain
 
 interface RecipeRepository {
 
