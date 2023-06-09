@@ -4,11 +4,11 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-typealias RecipeEntity = Recipe
+typealias IngredientEntity = Ingredient
 
 @Entity
-data class Recipe(
+data class Ingredient(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     @ColumnInfo(name = "name") val name: String,
-    @ColumnInfo(name = "prepareTime") val prepareTime: String,
+    @ColumnInfo(name = "idRecipe") val idRecipe: Int
 )

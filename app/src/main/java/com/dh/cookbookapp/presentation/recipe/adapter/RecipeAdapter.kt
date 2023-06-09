@@ -5,8 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.dh.cookbookapp.data.repository.model.RecipeDomain
 import com.dh.cookbookapp.databinding.ItemRecipeBinding
+import com.dh.cookbookapp.domain.model.RecipeDomain
 
 class RecipeAdapter : ListAdapter<RecipeDomain, RecipeAdapter.ViewHolder>(DiffCallback()) {
 
@@ -28,13 +28,15 @@ class RecipeAdapter : ListAdapter<RecipeDomain, RecipeAdapter.ViewHolder>(DiffCa
 
         fun bind(item: RecipeDomain) {
             binding.tvTitle.text = item.name
+            binding.root.setOnClickListener {
+                click(item)
+            }
         }
     }
 }
 
 class DiffCallback : DiffUtil.ItemCallback<RecipeDomain>() {
     override fun areItemsTheSame(oldItem: RecipeDomain, newItem: RecipeDomain) = oldItem == newItem
-
     override fun areContentsTheSame(oldItem: RecipeDomain, newItem: RecipeDomain) =
         oldItem.id == newItem.id
 }

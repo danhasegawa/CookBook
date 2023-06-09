@@ -1,6 +1,6 @@
 package com.dh.cookbookapp.presentation.recipe
 
-import com.dh.cookbookapp.data.repository.model.RecipeDomain
+import com.dh.cookbookapp.domain.model.RecipeDomain
 
 sealed interface RecipeState {
     object Loading : RecipeState

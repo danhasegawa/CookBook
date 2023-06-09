@@ -1,18 +1,20 @@
 package com.dh.cookbookapp.presentation.recipe
 
-import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.dh.cookbookapp.data.db
 import com.dh.cookbookapp.data.repository.RecipeRepositoryImpl
-import com.dh.cookbookapp.data.repository.model.RecipeDomain
+import com.dh.cookbookapp.domain.model.RecipeDomain
 import com.dh.cookbookapp.domain.usecase.GetAllRecipesUseCase
 import com.dh.cookbookapp.domain.usecase.InsertRecipeUseCase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 class RecipesViewModel(
@@ -20,29 +22,40 @@ class RecipesViewModel(
     private val insertRecipeUseCase: InsertRecipeUseCase
 ) : ViewModel() {
 
-    val state: LiveData<RecipeState> = liveData {
-        emit(RecipeState.Loading)
-        val state = try {
-            val recipes = getAllRecipesUseCase()
-            if (recipes.isEmpty()) {
-                RecipeState.Empty
-            } else {
-                RecipeState.Success(recipes)
+    private val _state = MutableSharedFlow<RecipesState>()
+    val state: SharedFlow<RecipesState> = _state
+
+    init {
+        getAllRecipes()
+    }
+
+    private fun getAllRecipes() = viewModelScope.launch {
+        getAllRecipesUseCase()
+            .flowOn(Dispatchers.Main)
+            .onStart {
+                _state.emit(RecipesState.Loading)
+            }.catch {
+                _state.emit(RecipesState.Error("erro"))
+            }.collect { recipes ->
+                if (recipes.isEmpty()) {
+                    _state.emit(RecipesState.Empty)
+                } else {
+                    _state.emit(RecipesState.Success(recipes))
+                }
             }
-        } catch (exception: Exception) {
-            Log.e("Error", exception.message.toString())
-            RecipeState.Error(exception.message.toString())
-        }
-        emit(state)
     }
 
     fun insert(name: String) = viewModelScope.launch {
-        insertRecipeUseCase(RecipeDomain(name = name))
+        insertRecipeUseCase(RecipeDomain(name = name, prepareTime = "45 min"))
     }
 
     class Factory : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            val application = checkNotNull(extras[APPLICATION_KEY])
+        override fun <T : ViewModel> create(
+            modelClass: Class<T>,
+            extras: CreationExtras
+        ): T {
+            val application =
+                checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY])
             val repository = RecipeRepositoryImpl(application.db.recipeDao())
             return RecipesViewModel(
                 getAllRecipesUseCase = GetAllRecipesUseCase(repository),
@@ -50,4 +63,5 @@ class RecipesViewModel(
             ) as T
         }
     }
+
 }
